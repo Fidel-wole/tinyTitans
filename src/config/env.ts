@@ -1,0 +1,19 @@
+import { config } from "dotenv";
+config();
+
+export const {
+  PORT,
+  NODE_ENV,
+  JWT_ACCESS_SECRET,
+  MONGO_DB_URL_DEV,
+  MONGO_DB_URL_PROD,
+  MONGO_DB_URL_STAGING,
+  CORS_URLS,
+  MAILTRAP_API,
+  SENDER_EMAIL,
+  JWT_AUTH_SECRET,
+  REDIS_URL,
+  PAYSTACK_SECRET_KEY,
+  PAYSTACK_BASE_URL,
+  FRONTEND_URL,
+} = process.env;

@@ -1,0 +1,28 @@
+{
+  "name": "tinytitians",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "build": "rimraf ./build && NODE_OPTIONS='--max-old-space-size=4096' tsc",
+    "start": "npm run build && NODE_OPTIONS='--max-old-space-size=4096' node build/server.js",
+    "dev": "nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.13",
+    "nodemon": "^3.1.9",
+    "rimraf": "^5.0.10"
+  }
+}
