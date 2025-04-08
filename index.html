@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tiny Titans Tap Test</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 5rem;
+    }
+    #tap-btn {
+      padding: 20px 40px;
+      font-size: 18px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #coin-count {
+      font-size: 24px;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Tiny Titans Tap Tester</h1>
+  <button id="tap-btn">👊 Tap to Earn Coins</button>
+  <div id="coin-count">Coins: 0</div>
+
+  <script>
+    const socket = io("http://localhost:3001"); // change to your backend address if deployed
+    const telegram_userId = "474592"; // Replace with real user ID
+
+    const tapBtn = document.getElementById("tap-btn");
+    const coinCount = document.getElementById("coin-count");
+
+    tapBtn.addEventListener("click", () => {
+      socket.emit("tap", { telegram_userId });
+    });
+
+    socket.on("coinsUpdated", ({ coins }) => {
+      coinCount.textContent = `Coins: ${coins}`;
+    });
+
+    socket.on("error", ({ message }) => {
+      alert("Error: " + message);
+    });
+
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+  </script>
+</body>
+</html>
