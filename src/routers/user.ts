@@ -9,4 +9,5 @@ userRouter.get(
   "/user/:telegram_userId/referrals",
   UserController.getReferrals
 );
+userRouter.get("/leaderboard", UserController.getLeaderboard);
 export default userRouter;

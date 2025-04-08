@@ -57,5 +57,21 @@ export default class UserService {
       throw new Error(err);
     }
   }
-
+  static async getLeaderboard() {
+    try {
+      // Fetch users sorted by 'coins' in descending order, limit to top 10
+      const users = await User.find()
+        .sort({ coins: -1 })  // Sorting by coins in descending order
+        .limit(10);           // Limiting to top 10 users
+  
+      return users;
+    } catch (err: unknown) {
+      // Enhanced error handling for better type safety
+      if (err instanceof Error) {
+        throw new Error(err.message);
+      }
+      throw new Error('An unknown error occurred while fetching the leaderboard');
+    }
+  }
+  
 }

@@ -37,4 +37,16 @@ export default class UserController {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
+  static async getLeaderboard(req: Request, res: Response) {
+    try {
+      const leaderboard = await UserService.getLeaderboard();
+      Dispatcher.DispatchSuccessMessage(
+        res,
+        "Leaderboard fetched successfully",
+        leaderboard
+      );
+    } catch (err:any) {
+      Dispatcher.DispatchErrorMessage(res, err.message);
+    }
+  }
 }
