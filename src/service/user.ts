@@ -59,19 +59,32 @@ export default class UserService {
   }
   static async getLeaderboard() {
     try {
-      // Fetch users sorted by 'coins' in descending order, limit to top 10
-      const users = await User.find()
-        .sort({ coins: -1 })  // Sorting by coins in descending order
-        .limit(10);           // Limiting to top 10 users
-  
+      const users = await User.find().sort({ coins: -1 }).limit(10);
+
       return users;
     } catch (err: unknown) {
-      // Enhanced error handling for better type safety
       if (err instanceof Error) {
         throw new Error(err.message);
       }
-      throw new Error('An unknown error occurred while fetching the leaderboard');
+      throw new Error(
+        "An unknown error occurred while fetching the leaderboard"
+      );
     }
   }
-  
+
+  static async selectCharacter(telegram_userId: string, characterId: string) {
+    try {
+      const user = await User.findOne({ telegram_userId });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      await user.selectCharacter(characterId);
+
+      return user;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
 }

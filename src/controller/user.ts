@@ -49,4 +49,21 @@ export default class UserController {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
+  static async selectCharacter(req: Request, res: Response) {
+    try {
+      const { telegram_userId } = req.params;
+      const { characterId } = req.body;
+
+  
+      const user = await UserService.selectCharacter(telegram_userId, characterId);
+
+      Dispatcher.DispatchSuccessMessage(
+        res,
+        "Character selected successfully",
+        user
+      );
+    } catch (err: any) {
+      Dispatcher.DispatchErrorMessage(res, err.message);
+    }
+  }
 }
