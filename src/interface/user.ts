@@ -1,20 +1,69 @@
 export interface IUser {
+  // Basic Information
   telegram_userId: string;
   username: string;
-  profile_picture: string;
+  profile_picture?: string;
+  
+  // Game Mechanics
+  energy: number;
+  maxEnergy: number;
+  energyRegenRate: number;
+  lastEnergyUpdate: Date;
+  tapPower: number;
+  tapMultiplier: number;
+  cooldown: number;
+  lastTapTime: Date;
+  
+  // Currency & Resources
+  coins: number;
+  gems: number;
   level: number;
-  avatar?: string; // This will store the character's ObjectId or character reference
+  
+  // Character System
+  avatar?: string; // Reference to Character model
   avatar_stats: {
     power: number;
     defense: number;
     speed: number;
-  }; // Added the avatar stats for upgraded character stats
-  energy: number; // Energy will be stored as a number with a default of 100
-  coins: number;
-  gems: number;
-  referral_code?: string;
-  referred_by?: string; // The ID of the user who referred this user
+    health: number;
+    experience: number;
+    experienceNeeded: number;
+  };
+  
+  // Progression System
+  skillPoints: number;
+  upgrades: {
+    tapPower: number;
+    energyCapacity: number;
+    energyRegen: number;
+    cooldownReduction: number;
+  };
+  
+  // Missions & Achievements
+  achievements: string[];
+  completedMissions: string[];
+  dailyMissions: {
+    missionId: string;
+    progress: number;
+    completed: boolean;
+  }[];
+  
+  // Web3 Integration
+  walletAddress?: string;
+  tokenBalance: number;
+  nftId?: string;
+  isNFT: boolean;
+  transactionHistory: {
+    type: string;
+    amount: number;
+    timestamp: Date;
+    txHash: string;
+  }[];
+  
+  // Social Features
+  referral_code: string;
+  referred_by?: string;
   referral_earnings: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  teamId?: string;
+  lastDailyReward: Date;
 }

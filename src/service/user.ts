@@ -87,4 +87,78 @@ export default class UserService {
       throw new Error(err.message);
     }
   }
+
+  /**
+   * Updates a user's information and game state
+   * @param userId - The telegram user ID
+   * @param updateData - The data to update
+   */
+  static async updateUser(
+    userId: string,
+    updateData: Partial<IUser>
+  ): Promise<IUser> {
+    try {
+      // Validate the user exists
+      const user = await User.findOne({ telegram_userId: userId });
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Prevent updating certain sensitive fields
+      const protectedFields = [
+        'telegram_userId',
+        'referral_code',
+        'referred_by',
+        'createdAt',
+        'updatedAt'
+      ];
+      
+      protectedFields.forEach(field => {
+        delete updateData[field as keyof typeof updateData];
+      });
+
+      // Handle special updates
+      if (updateData.energy !== undefined) {
+        // Ensure energy doesn't exceed maxEnergy
+        updateData.energy = Math.min(updateData.energy, user.maxEnergy);
+        updateData.lastEnergyUpdate = new Date();
+      }
+
+      if (updateData.tapPower !== undefined) {
+        // Apply any tap power multipliers
+        updateData.tapPower *= user.tapMultiplier;
+      }
+
+      // Update experience and level if provided
+      if (updateData.avatar_stats?.experience !== undefined) {
+        const newExp = user.avatar_stats.experience + (updateData.avatar_stats.experience || 0);
+        if (newExp >= user.avatar_stats.experienceNeeded) {
+          user.level += 1;
+          user.skillPoints += 1;
+          user.avatar_stats.experience = newExp - user.avatar_stats.experienceNeeded;
+          user.avatar_stats.experienceNeeded *= 1.5; // Increase exp needed for next level
+        } else {
+          user.avatar_stats.experience = newExp;
+        }
+        // if (updateData.avatar_stats?.experience !== undefined && updateData.avatar_stats) {
+        //   delete updateData.avatar_stats.experience;
+        // }
+      }
+
+      // Update the user with the new data
+      const updatedUser = await User.findOneAndUpdate(
+        { telegram_userId: userId },
+        { $set: updateData },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedUser) {
+        throw new Error("Failed to update user");
+      }
+
+      return updatedUser;
+    } catch (error: any) {
+      throw new Error(`Error updating user: ${error.message}`);
+    }
+  }
 }
