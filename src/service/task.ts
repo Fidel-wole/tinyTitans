@@ -1,5 +1,5 @@
 import { Task } from "../model/task";
-import { ITask } from "../interface/task";
+import { ITask, TaskType } from "../interface/task";
 import User from "../model/user";
 import mongoose from "mongoose";
 import { TaskStatus } from "../interface/user";
@@ -32,6 +32,7 @@ export default class TaskService {
       throw new Error(err);
     }
   }
+
   static async trackTaskProgress(data: ITaskOngoing, userId: string) {
     try {
       const user = await User.findOne({ telegram_user_id: userId });
@@ -40,9 +41,11 @@ export default class TaskService {
         throw new Error("User not found.");
       }
 
-      let task = user.tasks_progress.find((t) => t.task_id === data.task_id);
+      let taskIndex = user.tasks_progress.findIndex(
+        (t) => t.task_id.toString() === data.task_id.toString()
+      );
 
-      if (!task) {
+      if (taskIndex === -1) {
         // If the task is not ongoing, create a new entry for the task
         user.tasks_progress.push({
           task_id: data.task_id,
@@ -50,13 +53,36 @@ export default class TaskService {
           started_at: new Date(),
           last_updated_at: new Date(),
           progress: data.progress || 0,
-          metadata: data.metadata,
+          metadata: data.metadata || {},
         });
       } else {
-        // If the task is ongoing, update the progress
-        task.progress = data.progress;
+        // If the task exists, update the progress and metadata
+        const task = user.tasks_progress[taskIndex];
+        
+        // Update progress if provided
+        if (data.progress !== undefined) {
+          task.progress = data.progress;
+        }
+        
+        // Update metadata if provided, preserving existing fields
+        if (data.metadata) {
+          // Merge metadata instead of replacing it
+          task.metadata = {
+            ...task.metadata, // Keep existing metadata
+            ...data.metadata, // Add/update with new metadata
+            
+            // Special handling for nested objects
+            ...(data.metadata.quiz && task.metadata?.quiz ? {
+              quiz: { ...task.metadata.quiz, ...data.metadata.quiz }
+            } : {}),
+            
+            ...(data.metadata.referral && task.metadata?.referral ? {
+              referral: { ...task.metadata.referral, ...data.metadata.referral }
+            } : {})
+          };
+        }
+        
         task.last_updated_at = new Date();
-        task.metadata = data.metadata; // Update metadata (e.g., quiz progress)
       }
 
       await user.save();
@@ -66,47 +92,6 @@ export default class TaskService {
     }
   }
 
-  // Complete the task and reward the user
-  static async completeTask(userId: string, taskId: string) {
-    try {
-      const user = await User.findOne({ telegram_user_id: userId });
-
-      if (!user) {
-        throw new Error("User not found.");
-      }
-console.log(user)
-      // Find the ongoing task in the user's tasks
-      const ongoingTaskIndex = user.tasks_progress.findIndex(
-        (t) =>
-          t.task_id.toString() === taskId && t.status === TaskStatus.ONGOING
-      );
-
-      if (ongoingTaskIndex === -1) {
-        throw new Error("Task not in progress.");
-      }
-
-      // Mark the task as completed
-      const task = user.tasks_progress[ongoingTaskIndex];
-      task.status = TaskStatus.COMPLETED;
-      task.last_updated_at = new Date();
-
-      // Reward the user with the task's reward points (assuming Task contains reward_points)
-      const taskData = await Task.findById(taskId);
-      if (!taskData) {
-        throw new Error("Task not found.");
-      }
-
-      user.coins += taskData.reward_points; // Add coins for completing the task
-
-      user.tasks_progress[ongoingTaskIndex].status = TaskStatus.COMPLETED;
-
-      await user.save();
-
-      return user;
-    } catch (err: any) {
-      throw new Error(`Error completing task: ${err.message}`);
-    }
-  }
 
   static async getTotalCompletedTasks(userId: string) {
     try {
@@ -175,6 +160,7 @@ console.log(user)
       throw new Error(`Error fetching total quizzes completed: ${err.message}`);
     }
   }
+
   static async getUserTaskStats(userId: string) {
     try {
       const user = await User.findOne({ telegram_user_id: userId });

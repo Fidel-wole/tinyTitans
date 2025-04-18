@@ -89,11 +89,12 @@ const UserSchema = new Schema<IUserModel>(
         started_at: { type: Date, default: Date.now },
         last_updated_at: { type: Date },
         progress: { type: Number, default: 0 },
-        metadata: { type: Number },
+        metadata: {
+          type: Schema.Types.Mixed,  // Using Mixed type to store structured metadata
+          default: {}
+        },
       },
     ],
-    
-    
 
     // Web3 Integration
     wallet_address: { type: String },

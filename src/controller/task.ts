@@ -69,23 +69,6 @@ export default class TaskController {
     }
   }
 
-  static async completeTask(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = req.body.telegram_user_id;
-      const taskId = req.body.task_id;
-      const completedTask = await TaskService.completeTask(userId, taskId);
-
-      Dispatcher.DispatchSuccessMessage(
-        res,
-        "Task completed successfully",
-        completedTask
-      );
-      return;
-    } catch (error: any) {
-      Dispatcher.DispatchErrorMessage(res, error.message);
-      return;
-    }
-  }
 
   static async getUserTaskStats(req: Request, res: Response): Promise<void> {
     try {

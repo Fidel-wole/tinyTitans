@@ -12,6 +12,5 @@ taskRouter.put(
     TaskController.trackTaskProgress
 );
 taskRouter.get("/task/stats/:user_id", TaskController.getUserTaskStats);
-taskRouter.put("/task/complete", TaskController.completeTask);
     
 export default taskRouter;

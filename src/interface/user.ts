@@ -81,7 +81,23 @@ export interface ITaskOngoing {
   started_at: Date; // Track when the task was started
   last_updated_at: Date; // Track the last update time for progress
   progress?: number; // Optional, can track the percentage or progress made
-  metadata?: any; // Optional, to store any additional info related to the task (e.g., quiz progress, etc.)
+  metadata?: TaskMetadata; // Store structured metadata for different task types
+}
+
+export interface TaskMetadata {
+  quiz?: {
+    quizId: string;
+    score: number;
+    completed?: boolean;
+    completedAt?: Date;
+  };
+  referral?: {
+    referredUsers?: string[];
+    referralCount?: number;
+    lastReferredUser?: string;
+    lastReferredAt?: Date;
+  };
+  custom?: Record<string, any>; // For other task types with custom metadata
 }
 
 export enum TaskStatus {

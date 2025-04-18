@@ -18,7 +18,7 @@ export default class UserService {
             user.referred_by = referrer._id as string;
             await User.updateOne(
               { _id: user.referred_by },
-              { $inc: { referral_earnings: 2000 } }
+              { $inc: { referral_earnings: 2000, coins: 2000 } }
             );
           } else {
             throw new Error("Invalid referral code");
@@ -102,7 +102,7 @@ export default class UserService {
       if (!user) {
         throw new Error("User not found");
       }
-  
+
       // Prevent updating sensitive fields
       const protectedFields = [
         "user_id",
@@ -111,21 +111,21 @@ export default class UserService {
         "created_at",
         "updated_at",
       ];
-  
+
       protectedFields.forEach((field) => {
         delete updateData[field as keyof typeof updateData];
       });
-  
+
       // Handle energy logic
       if (updateData.energy !== undefined) {
         updateData.energy = Math.min(updateData.energy, user.max_energy);
         updateData.last_energy_update = new Date();
       }
-  
+
       if (updateData.tap_power !== undefined) {
         updateData.tap_power *= user.tap_multiplier;
       }
-  
+
       // ⚡ Update stats of the currently selected avatar
       if (
         updateData.avatars &&
@@ -135,15 +135,18 @@ export default class UserService {
         const currentAvatar = user.avatars.find(
           (a) => a.character.toString() === user.avatar?.toString()
         );
-  
+
         const incomingAvatarUpdate = updateData.avatars.find(
           (a) => a.character.toString() === user.avatar?.toString()
         );
-  
-        if (currentAvatar && incomingAvatarUpdate?.stats?.experience !== undefined) {
+
+        if (
+          currentAvatar &&
+          incomingAvatarUpdate?.stats?.experience !== undefined
+        ) {
           const incomingExp = incomingAvatarUpdate.stats.experience || 0;
           const totalExp = currentAvatar.stats.experience + incomingExp;
-  
+
           if (totalExp >= currentAvatar.stats.experience_needed) {
             user.level += 1;
             user.skill_points += 1;
@@ -155,16 +158,15 @@ export default class UserService {
           }
         }
       }
-  
+
       // Set all other updateable fields
       Object.assign(user, updateData);
-  
+
       await user.save();
-  
+
       return user;
     } catch (error: any) {
       throw new Error(`Error updating user: ${error.message}`);
     }
   }
-  
 }
