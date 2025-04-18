@@ -10,14 +10,14 @@ export const registerSocketHandlers = (io: Server): void => {
     console.log(`[Socket] User connected: ${socket.id}`);
 
     socket.on("tap", async (data: TapPayload) => {
-      const { telegram_userId } = data;
+      const { telegram_user_id } = data;
 
-      if (!telegram_userId) {
+      if (!telegram_user_id) {
         return socket.emit("error", { message: "Invalid payload" });
       }
 
       try {
-        const user = await User.findOne({ telegram_userId });
+        const user = await User.findOne({ telegram_user_id });
 
         if (!user) {
           return socket.emit("error", { message: "User not found" });
