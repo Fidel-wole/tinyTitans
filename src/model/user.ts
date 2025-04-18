@@ -16,8 +16,8 @@ const UserSchema = new Schema<IUserModel>(
     profile_picture: { type: String },
     
     // Game Mechanics
-    energy: { type: Number, default: 100 },
-    max_energy: { type: Number, default: 100 },
+    energy: { type: Number, default: 3000 },
+    max_energy: { type: Number, default: 3000 },
     energy_regen_rate: { type: Number, default: 1 },
     last_energy_update: { type: Date, default: Date.now },
     tap_power: { type: Number, default: 1 },
@@ -95,11 +95,6 @@ const UserSchema = new Schema<IUserModel>(
   { timestamps: true }
 );
 
-// Indexes for better query performance
-UserSchema.index({ telegram_user_id: 1 });
-UserSchema.index({ referral_code: 1 });
-UserSchema.index({ team_id: 1 });
-UserSchema.index({ wallet_address: 1 });
 
 // Method to select a character
 UserSchema.methods.select_character = async function (character_id: string) {

@@ -19,10 +19,11 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      margin: 10px;
     }
-    #coin-count {
+    #coin-count, #energy-count {
       font-size: 24px;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -30,32 +31,47 @@
   <h1>🛡️ Tiny Titans Tap Tester</h1>
   <button id="tap-btn">👊 Tap to Earn Coins</button>
   <div id="coin-count">Coins: 0</div>
+  <div id="energy-count">Energy: 3000 / 3000</div>
 
   <script>
-    const socket = io("https://starfish-app-pzhjt.ondigitalocean.app"); // change to your backend address if deployed
-    const telegram_userId = "474592"; // Replace with real user ID
+    const socket = io("http://localhost:3001"); // Change this to your deployed backend
+    const telegram_user_id = "2302gh5"; // Replace with a valid user ID
 
     const tapBtn = document.getElementById("tap-btn");
     const coinCount = document.getElementById("coin-count");
+    const energyCount = document.getElementById("energy-count");
 
+    // Initialize user and start energy regeneration
+    socket.emit("initUser", { telegram_user_id });
+
+    // Tap button
     tapBtn.addEventListener("click", () => {
-      socket.emit("tap", { telegram_userId });
+      socket.emit("tap", { telegram_user_id });
     });
 
-    socket.on("coinsUpdated", ({ coins }) => {
+    // Listen for coin + energy update after tap
+    socket.on("statusUpdated", ({ coins, energy, max_energy }) => {
       coinCount.textContent = `Coins: ${coins}`;
+      energyCount.textContent = `Energy: ${energy} / ${max_energy}`;
     });
 
+    // Listen for energy update from regeneration
+    socket.on("energyUpdated", ({ energy, max_energy }) => {
+      energyCount.textContent = `Energy: ${energy} / ${max_energy}`;
+    });
+
+    // Handle errors
     socket.on("error", ({ message }) => {
       alert("Error: " + message);
     });
 
+    // Connection events
     socket.on("connect", () => {
-      console.log("Connected to Socket.IO server:", socket.id);
+      console.log("✅ Connected to server:", socket.id);
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from server");
+      console.log("❌ Disconnected from server");
     });
   </script>
 </body>
