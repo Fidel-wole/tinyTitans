@@ -5,7 +5,7 @@ import { generateReferralCode } from "../utils/strings";
 export default class UserService {
   static async createUser(user: IUser) {
     try {
-      let existingUser = await this.getUser(user.telegram_userId);
+      let existingUser = await this.getUser(user.telegram_user_id);
 
       if (!existingUser) {
         if (user.referral_code) {
@@ -80,7 +80,7 @@ export default class UserService {
         throw new Error("User not found");
       }
 
-      await user.selectCharacter(characterId);
+      await user.select_character(characterId);
 
       return user;
     } catch (err: any) {
@@ -94,63 +94,63 @@ export default class UserService {
    * @param updateData - The data to update
    */
   static async updateUser(
-    userId: string,
+    user_id: string,
     updateData: Partial<IUser>
   ): Promise<IUser> {
     try {
       // Validate the user exists
-      const user = await User.findOne({ telegram_userId: userId });
+      const user = await User.findOne({ telegram_user_id: user_id });
       if (!user) {
         throw new Error("User not found");
       }
 
       // Prevent updating certain sensitive fields
       const protectedFields = [
-        'telegram_userId',
-        'referral_code',
-        'referred_by',
-        'createdAt',
-        'updatedAt'
+        "user_id",
+        "referral_code",
+        "referred_by",
+        "created_at",
+        "updated_at",
       ];
-      
-      protectedFields.forEach(field => {
+
+      protectedFields.forEach((field) => {
         delete updateData[field as keyof typeof updateData];
       });
 
       // Handle special updates
       if (updateData.energy !== undefined) {
-        // Ensure energy doesn't exceed maxEnergy
-        updateData.energy = Math.min(updateData.energy, user.maxEnergy);
-        updateData.lastEnergyUpdate = new Date();
+        updateData.energy = Math.min(updateData.energy, user.max_energy);
+        updateData.last_energy_update = new Date();
       }
 
-      if (updateData.tapPower !== undefined) {
-        // Apply any tap power multipliers
-        updateData.tapPower *= user.tapMultiplier;
+      if (updateData.tap_power !== undefined) {
+        updateData.tap_power *= user.tap_multiplier;
       }
 
       // Update experience and level if provided
       if (updateData.avatar_stats?.experience !== undefined) {
-        const newExp = user.avatar_stats.experience + (updateData.avatar_stats.experience || 0);
-        if (newExp >= user.avatar_stats.experienceNeeded) {
+        const newExp =
+          user.avatar_stats.experience +
+          (updateData.avatar_stats.experience || 0);
+        if (newExp >= user.avatar_stats.experience_needed) {
           user.level += 1;
-          user.skillPoints += 1;
-          user.avatar_stats.experience = newExp - user.avatar_stats.experienceNeeded;
-          user.avatar_stats.experienceNeeded *= 1.5; // Increase exp needed for next level
+          user.skill_points += 1;
+          user.avatar_stats.experience =
+            newExp - user.avatar_stats.experience_needed;
+          user.avatar_stats.experience_needed *= 1.5;
         } else {
           user.avatar_stats.experience = newExp;
         }
-        // if (updateData.avatar_stats?.experience !== undefined && updateData.avatar_stats) {
-        //   delete updateData.avatar_stats.experience;
-        // }
       }
 
       // Update the user with the new data
       const updatedUser = await User.findOneAndUpdate(
-        { telegram_userId: userId },
+        { telegram_user_id: user_id },
         { $set: updateData },
         { new: true, runValidators: true }
       );
+
+      console.log("Updated User:", updatedUser); 
 
       if (!updatedUser) {
         throw new Error("Failed to update user");

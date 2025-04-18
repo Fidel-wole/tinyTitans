@@ -66,4 +66,15 @@ export default class UserController {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
+
+  static async updateUser(req: Request, res: Response) {
+    try {
+      const { telegram_user_id } = req.params;
+      const data: Partial<IUser> = req.body;
+      const user = await UserService.updateUser(telegram_user_id, data);
+      Dispatcher.DispatchSuccessMessage(res, "User updated successfully", user);
+    } catch (err:any) {
+      Dispatcher.DispatchErrorMessage(res, err.message);
+    }
+  }
 }

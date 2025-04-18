@@ -4,6 +4,7 @@ import multer from "multer";
 import { uploadImage } from "../controller/cloudinary";
 import characterRouter from "./character";
 import quizRouter from "./quiz";
+import taskRouter from "./task";
 
 const testRouter = Router();
 
@@ -22,5 +23,6 @@ const v1Router: Router[] = [
   userRouter,
   characterRouter,
   quizRouter,
+  taskRouter,
 ];
 export default v1Router;

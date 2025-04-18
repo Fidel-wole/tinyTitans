@@ -13,5 +13,6 @@ userRouter.post(
   "/user/:telegram_userId/select-character",
   UserController.selectCharacter
 );
+userRouter.put("/user/update/:telegram_user_id", UserController.updateUser);
 userRouter.get("/leaderboard", UserController.getLeaderboard);
 export default userRouter;
