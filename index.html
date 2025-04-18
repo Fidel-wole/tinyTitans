@@ -10,6 +10,7 @@
       font-family: sans-serif;
       text-align: center;
       margin-top: 5rem;
+      background-color: #f5f5f5;
     }
     #tap-btn {
       padding: 20px 40px;
@@ -19,59 +20,275 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      margin: 10px;
+      margin: 20px;
+      transition: transform 0.1s, background-color 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    #tap-btn:active {
+      transform: scale(0.95);
+      background: #3c3599;
+    }
+    #tap-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
     }
     #coin-count, #energy-count {
       font-size: 24px;
       margin-top: 1rem;
     }
+    .status-container {
+      margin: 20px auto;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: inline-block;
+      min-width: 250px;
+    }
+    #status-message {
+      color: #4f46e5;
+      font-size: 14px;
+      height: 20px;
+      margin-top: 10px;
+    }
+    #connection-status {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #22c55e; /* Green */
+      margin-right: 5px;
+    }
+    .coin-flash {
+      animation: flash 0.5s;
+    }
+    .pending-badge {
+      display: inline-block;
+      background-color: #f59e0b;
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin-left: 8px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pending-badge.visible {
+      opacity: 1;
+    }
+    @keyframes flash {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); color: gold; }
+      100% { transform: scale(1); }
+    }
+    .tap-ripple {
+      width: 20px;
+      height: 20px;
+      background-color: rgba(79, 70, 229, 0.4);
+      border-radius: 50%;
+      position: absolute;
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes ripple {
+      to {
+        transform: scale(15);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>🛡️ Tiny Titans Tap Tester</h1>
-  <button id="tap-btn">👊 Tap to Earn Coins</button>
-  <div id="coin-count">Coins: 0</div>
-  <div id="energy-count">Energy: 3000 / 3000</div>
+  
+  <div id="tap-container">
+    <button id="tap-btn">👊 Tap to Earn Coins</button>
+  </div>
+  
+  <div class="status-container">
+    <div>
+      <span id="connection-status"></span>
+      <span id="connection-text">Connected</span>
+    </div>
+    <div id="coin-count">Coins: 0 <span id="pending-badge" class="pending-badge">+0 pending</span></div>
+    <div id="energy-count">Energy: 3000 / 3000</div>
+    <div id="status-message"></div>
+  </div>
 
   <script>
-    const socket = io("http://localhost:3001"); // Change this to your deployed backend
+    const socket = io("http://localhost:3001", {
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000
+    });
+    
     const telegram_user_id = "2302gh5"; // Replace with a valid user ID
 
     const tapBtn = document.getElementById("tap-btn");
+    const tapContainer = document.getElementById("tap-container");
     const coinCount = document.getElementById("coin-count");
     const energyCount = document.getElementById("energy-count");
+    const statusMessage = document.getElementById("status-message");
+    const connectionStatus = document.getElementById("connection-status");
+    const connectionText = document.getElementById("connection-text");
+    const pendingBadge = document.getElementById("pending-badge");
+
+    // Variables to track tapping state
+    let isConnected = false;
+    let canTap = true;
+    let pendingTaps = 0;
+    
+    // Tap animation effect
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement("span");
+      ripple.classList.add("tap-ripple");
+      
+      const rect = button.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      
+      // Position ripple where clicked
+      const x = event.clientX - rect.left - size / 2;
+      const y = event.clientY - rect.top - size / 2;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      button.appendChild(ripple);
+      
+      // Remove ripple after animation
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+
+    // Flash animation for coin increases
+    function flashCoinCount() {
+      coinCount.classList.add("coin-flash");
+      setTimeout(() => {
+        coinCount.classList.remove("coin-flash");
+      }, 500);
+    }
+
+    // Update pending indicator
+    function updatePendingBadge(count) {
+      if (count > 0) {
+        pendingBadge.textContent = `+${count} pending`;
+        pendingBadge.classList.add("visible");
+      } else {
+        pendingBadge.classList.remove("visible");
+      }
+    }
 
     // Initialize user and start energy regeneration
     socket.emit("initUser", { telegram_user_id });
 
-    // Tap button
-    tapBtn.addEventListener("click", () => {
-      socket.emit("tap", { telegram_user_id });
+    // Tap button handling
+    tapBtn.addEventListener("click", (event) => {
+      if (!canTap || !isConnected) return;
+      
+      // Create visual ripple effect
+      createRipple(event);
+      
+      // Prevent rapid tapping
+      tapBtn.style.pointerEvents = "none";
+      setTimeout(() => {
+        tapBtn.style.pointerEvents = "auto";
+      }, 50);
+      
+      // Optimistic UI update
+      socket.emit("tap");
     });
 
-    // Listen for coin + energy update after tap
-    socket.on("statusUpdated", ({ coins, energy, max_energy }) => {
+    // Socket event handlers
+    socket.on("statusUpdated", ({ coins, energy, max_energy, pending = 0 }) => {
       coinCount.textContent = `Coins: ${coins}`;
       energyCount.textContent = `Energy: ${energy} / ${max_energy}`;
+      
+      updatePendingBadge(pending);
+      pendingTaps = pending;
+      
+      flashCoinCount();
+      canTap = true;
     });
 
-    // Listen for energy update from regeneration
     socket.on("energyUpdated", ({ energy, max_energy }) => {
       energyCount.textContent = `Energy: ${energy} / ${max_energy}`;
     });
 
-    // Handle errors
     socket.on("error", ({ message }) => {
-      alert("Error: " + message);
+      statusMessage.textContent = message;
+      statusMessage.style.color = "red";
+      
+      setTimeout(() => {
+        statusMessage.textContent = "";
+      }, 3000);
+      
+      canTap = true;
     });
 
-    // Connection events
+    // Connection state handling
     socket.on("connect", () => {
       console.log("✅ Connected to server:", socket.id);
+      isConnected = true;
+      connectionStatus.style.backgroundColor = "#22c55e"; // Green
+      connectionText.textContent = "Connected";
+      tapBtn.disabled = false;
+      
+      statusMessage.textContent = "Connected to server!";
+      statusMessage.style.color = "green";
+      
+      setTimeout(() => {
+        statusMessage.textContent = "";
+      }, 2000);
+      
+      // Reinitialize on reconnection
+      if (pendingTaps > 0) {
+        socket.emit("initUser", { telegram_user_id });
+      }
     });
 
-    socket.on("disconnect", () => {
-      console.log("❌ Disconnected from server");
+    socket.on("connect_error", (err) => {
+      console.error("Connection error:", err);
+      connectionStatus.style.backgroundColor = "#f97316"; // Orange
+      connectionText.textContent = "Connecting...";
+      statusMessage.textContent = "Connection issue. Retrying...";
+      statusMessage.style.color = "orange";
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("❌ Disconnected from server:", reason);
+      isConnected = false;
+      connectionStatus.style.backgroundColor = "#ef4444"; // Red
+      connectionText.textContent = "Disconnected";
+      
+      if (reason === "io server disconnect") {
+        // Server initiated disconnect, need to reconnect manually
+        socket.connect();
+      }
+      
+      statusMessage.textContent = "Disconnected from server. Reconnecting...";
+      statusMessage.style.color = "red";
+    });
+
+    // Double tap detection for mobile
+    let lastTap = 0;
+    document.addEventListener('touchend', function(event) {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTap;
+      
+      if (tapLength < 300 && tapLength > 0) {
+        event.preventDefault();
+      }
+      
+      lastTap = currentTime;
+    });
+
+    // Prevent zoom on double tap on mobile
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
     });
   </script>
 </body>
