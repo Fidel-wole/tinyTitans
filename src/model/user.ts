@@ -78,6 +78,22 @@ const UserSchema = new Schema<IUserModel>(
         completed: { type: Boolean, default: false },
       },
     ],
+    tasks_progress: [
+      {
+        task_id: { type: Schema.Types.ObjectId, ref: "Task", required: true },
+        status: {
+          type: String,
+          enum: ["ongoing", "completed", "failed"],
+          default: "ongoing",
+        },
+        started_at: { type: Date, default: Date.now },
+        last_updated_at: { type: Date },
+        progress: { type: Number, default: 0 },
+        metadata: { type: Number },
+      },
+    ],
+    
+    
 
     // Web3 Integration
     wallet_address: { type: String },

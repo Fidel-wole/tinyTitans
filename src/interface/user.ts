@@ -63,10 +63,29 @@ export interface IUser {
     tx_hash: string;
   }[];
 
+  tasks_progress: ITaskOngoing[];
+
   // Social Features
   referral_code: string;
   referred_by?: string;
   referral_earnings: number;
   team_id?: string;
   last_daily_reward: Date;
+}
+
+import mongoose from "mongoose";
+
+export interface ITaskOngoing {
+  task_id: mongoose.Types.ObjectId;
+  status: TaskStatus;
+  started_at: Date; // Track when the task was started
+  last_updated_at: Date; // Track the last update time for progress
+  progress?: number; // Optional, can track the percentage or progress made
+  metadata?: any; // Optional, to store any additional info related to the task (e.g., quiz progress, etc.)
+}
+
+export enum TaskStatus {
+  ONGOING = "ongoing",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
