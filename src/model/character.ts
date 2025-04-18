@@ -34,6 +34,7 @@ const CharacterSchema = new Schema<ICharacter>({
     accessories: [{ type: String }]
   },
   is_free: { type: Boolean, default: true },
+  price: { type: Number, default: 0 },
 }, {
   timestamps: true
 });

@@ -97,6 +97,267 @@
         opacity: 0;
       }
     }
+    
+    /* Battle Section Styles */
+    .battle-section {
+      margin: 40px auto;
+      max-width: 600px;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .battle-header {
+      color: #4f46e5;
+      font-size: 24px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .battle-description {
+      font-style: italic;
+      color: #4b5563;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .battle-info {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .battle-info-item {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px;
+      margin: 5px;
+      background-color: #f8f9ff;
+      border-radius: 8px;
+      border-left: 4px solid #4f46e5;
+    }
+    .battle-info-title {
+      font-weight: bold;
+      color: #4f46e5;
+      margin-bottom: 8px;
+    }
+    .battle-info-text {
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .battle-type-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .battle-type-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      background: #e5e7eb;
+      color: #4b5563;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .battle-type-btn.active {
+      background: #4f46e5;
+      color: white;
+    }
+    .battle-type-btn:hover:not(.active) {
+      background: #d1d5db;
+    }
+    .difficulty-selector {
+      margin: 20px 0;
+    }
+    .difficulty-label {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .difficulty-options {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .difficulty-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      background: #e5e7eb;
+      color: #4b5563;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .difficulty-btn.active {
+      background: #4f46e5;
+      color: white;
+    }
+    .difficulty-btn:hover:not(.active) {
+      background: #d1d5db;
+    }
+    .matchmaking-info {
+      margin: 20px 0;
+    }
+    .energy-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .matchmaking-spinner {
+      width: 24px;
+      height: 24px;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    #battle-btn, #find-opponent-btn {
+      padding: 15px 30px;
+      font-size: 16px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+      transition: transform 0.1s, background-color 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    #battle-btn:hover:not(:disabled), #find-opponent-btn:hover:not(:disabled) {
+      background: #dc2626;
+    }
+    #battle-btn:active:not(:disabled), #find-opponent-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    #battle-btn:disabled, #find-opponent-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    #battle-quick-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px auto;
+      display: none;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+    #battle-quick-btn:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    .battle-action-buttons {
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .battle-action-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+    .battle-action-btn.attack {
+      background: #ef4444;
+      color: white;
+    }
+    .battle-action-btn.defend {
+      background: #3b82f6;
+      color: white;
+    }
+    .battle-action-btn.special {
+      background: #8b5cf6;
+      color: white;
+    }
+    .battle-action-btn:hover:not(:disabled) {
+      filter: brightness(110%);
+    }
+    .battle-action-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    .battle-arena {
+      display: none;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f0f4ff;
+      border-radius: 8px;
+    }
+    .battle-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .battle-participant {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    .battle-participant h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+    }
+    .health-bar {
+      height: 15px;
+      background-color: #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .health-bar-fill {
+      height: 100%;
+      background-color: #22c55e;
+      transition: width 0.3s ease;
+    }
+    .battle-log {
+      margin-top: 15px;
+      padding: 10px;
+      height: 150px;
+      overflow-y: auto;
+      background-color: #1f2937;
+      color: #e5e7eb;
+      border-radius: 6px;
+      font-family: monospace;
+      text-align: left;
+      line-height: 1.5;
+    }
+    .battle-result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      display: none;
+    }
+    .victory {
+      background-color: rgba(34, 197, 94, 0.2);
+      color: #15803d;
+    }
+    .defeat {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #b91c1c;
+    }
+    .draw {
+      background-color: rgba(250, 204, 21, 0.2);
+      color: #854d0e;
+    }
+    .battle-rewards {
+      margin-top: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -114,6 +375,100 @@
     <div id="coin-count">Coins: 0 <span id="pending-badge" class="pending-badge">+0 pending</span></div>
     <div id="energy-count">Energy: 3000 / 3000</div>
     <div id="status-message"></div>
+  </div>
+
+  <!-- Battle Section -->
+  <div class="battle-section">
+    <div class="battle-header">⚔️ Join Battles & Earn More Coins</div>
+    <div class="battle-description">Equip thy finest armor and upgrade ancient relics to prepare for the mighty clash ahead. Victory favors the bold!</div>
+    
+    <div class="battle-info">
+      <div class="battle-info-item">
+        <div class="battle-info-title">🏆 Battle & Earn Coins!</div>
+        <div class="battle-info-text">Face worthy foes in glorious combat. Win battles, earn gold, and prove thy valor in the lands of Eldoria!</div>
+      </div>
+      <div class="battle-info-item">
+        <div class="battle-info-title">⚔️ How it Works</div>
+        <div class="battle-info-text">Spend energy to battle foes. Victory grants coins while defeat teaches valuable lessons. Each battle requires 10 energy.</div>
+      </div>
+    </div>
+
+    <div class="battle-type-selector">
+      <button id="pve-btn" class="battle-type-btn active">🤖 Battle AI</button>
+      <button id="pvp-btn" class="battle-type-btn">👤 Battle Players</button>
+    </div>
+    
+    <div id="battle-controls">
+      <!-- PvE Battle Controls -->
+      <div id="pve-controls">
+        <div class="difficulty-selector">
+          <div class="difficulty-label">Choose Difficulty:</div>
+          <div class="difficulty-options">
+            <button data-difficulty="easy" class="difficulty-btn active">Easy</button>
+            <button data-difficulty="medium" class="difficulty-btn">Medium</button>
+            <button data-difficulty="hard" class="difficulty-btn">Hard</button>
+          </div>
+        </div>
+        <button id="battle-btn">⚔️ Enter Battle (10 Energy)</button>
+      </div>
+
+      <!-- PvP Battle Controls -->
+      <div id="pvp-controls" style="display: none;">
+        <div class="matchmaking-info">
+          <p>Battle against other online players! Both players spend the same amount of energy, and rewards are given based on the outcome.</p>
+          <div class="energy-input">
+            <label for="pvp-energy">Energy to spend:</label>
+            <input type="range" id="pvp-energy" min="10" max="100" step="10" value="10">
+            <span id="pvp-energy-value">10</span>
+          </div>
+        </div>
+        <button id="find-opponent-btn">🔍 Find Opponent (10 Energy)</button>
+        <div id="matchmaking-status" style="display: none;">
+          <p id="matchmaking-message">Searching for opponent...</p>
+          <div class="matchmaking-spinner"></div>
+          <button id="cancel-matchmaking-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="battle-arena" class="battle-arena">
+      <h3>Battle in Progress</h3>
+      
+      <div class="battle-stats">
+        <div class="battle-participant" id="user-stats">
+          <h3>Your Character</h3>
+          <div class="health-bar">
+            <div class="health-bar-fill" id="user-health" style="width: 100%;"></div>
+          </div>
+          <div id="user-stats-text">Health: 100/100</div>
+        </div>
+        
+        <div class="battle-participant" id="opponent-stats">
+          <h3 id="opponent-name">Enemy</h3>
+          <div class="health-bar">
+            <div class="health-bar-fill" id="opponent-health" style="width: 100%;"></div>
+          </div>
+          <div id="opponent-stats-text">Health: 100/100</div>
+        </div>
+      </div>
+      
+      <div class="battle-action-buttons" id="battle-actions">
+        <button class="battle-action-btn attack" data-action="attack">⚔️ Attack</button>
+        <button class="battle-action-btn defend" data-action="defend">🛡️ Defend</button>
+        <button class="battle-action-btn special" data-action="special">✨ Special</button>
+      </div>
+      
+      <button id="battle-quick-btn">⚡ Auto-Resolve Battle</button>
+      
+      <div class="battle-log" id="battle-log">
+        Battle starting... prepare for combat!
+      </div>
+      
+      <div class="battle-result" id="battle-result">
+        <div id="result-text"></div>
+        <div class="battle-rewards" id="battle-rewards"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -135,10 +490,42 @@
     const connectionText = document.getElementById("connection-text");
     const pendingBadge = document.getElementById("pending-badge");
 
-    // Variables to track tapping state
+    // Battle elements
+    const battleBtn = document.getElementById("battle-btn");
+    const battleArena = document.getElementById("battle-arena");
+    const battleActions = document.getElementById("battle-actions");
+    const battleQuickBtn = document.getElementById("battle-quick-btn");
+    const battleLog = document.getElementById("battle-log");
+    const battleResult = document.getElementById("battle-result");
+    const resultText = document.getElementById("result-text");
+    const battleRewards = document.getElementById("battle-rewards");
+    const userHealth = document.getElementById("user-health");
+    const opponentHealth = document.getElementById("opponent-health");
+    const userStatsText = document.getElementById("user-stats-text");
+    const opponentStatsText = document.getElementById("opponent-stats-text");
+    const opponentName = document.getElementById("opponent-name");
+
+    // PvP elements
+    const pveBtn = document.getElementById("pve-btn");
+    const pvpBtn = document.getElementById("pvp-btn");
+    const pveControls = document.getElementById("pve-controls");
+    const pvpControls = document.getElementById("pvp-controls");
+    const findOpponentBtn = document.getElementById("find-opponent-btn");
+    const matchmakingStatus = document.getElementById("matchmaking-status");
+    const matchmakingMessage = document.getElementById("matchmaking-message");
+    const cancelMatchmakingBtn = document.getElementById("cancel-matchmaking-btn");
+    const pvpEnergyInput = document.getElementById("pvp-energy");
+    const pvpEnergyValue = document.getElementById("pvp-energy-value");
+
+    // Variables to track state
     let isConnected = false;
     let canTap = true;
     let pendingTaps = 0;
+    let activeBattleId = null;
+    let userStats = null;
+    let opponentStats = null;
+    let battleType = "pve"; // Default battle type
+    let matchmakingActive = false;
     
     // Tap animation effect
     function createRipple(event) {
@@ -182,6 +569,53 @@
       }
     }
 
+    // Log a message to the battle log
+    function logBattleMessage(message) {
+      const entry = document.createElement("div");
+      entry.textContent = `[Round ${battleLog.childElementCount}] ${message}`;
+      battleLog.appendChild(entry);
+      battleLog.scrollTop = battleLog.scrollHeight;
+    }
+
+    // Update health bars
+    function updateHealthBars() {
+      if (!userStats || !opponentStats) return;
+      
+      const userHealthPercent = (userStats.current_health / userStats.initial_health) * 100;
+      const opponentHealthPercent = (opponentStats.current_health / opponentStats.initial_health) * 100;
+      
+      userHealth.style.width = `${Math.max(0, userHealthPercent)}%`;
+      opponentHealth.style.width = `${Math.max(0, opponentHealthPercent)}%`;
+      
+      userStatsText.textContent = `Health: ${Math.round(userStats.current_health)}/${userStats.initial_health} | Power: ${userStats.power} | Defense: ${userStats.defense}`;
+      opponentStatsText.textContent = `Health: ${Math.round(opponentStats.current_health)}/${opponentStats.initial_health} | Power: ${opponentStats.power} | Defense: ${opponentStats.defense}`;
+      
+      // Change health bar color based on health percentage
+      if (userHealthPercent < 25) {
+        userHealth.style.backgroundColor = "#ef4444";
+      } else if (userHealthPercent < 50) {
+        userHealth.style.backgroundColor = "#f59e0b";
+      } else {
+        userHealth.style.backgroundColor = "#22c55e";
+      }
+      
+      if (opponentHealthPercent < 25) {
+        opponentHealth.style.backgroundColor = "#ef4444";
+      } else if (opponentHealthPercent < 50) {
+        opponentHealth.style.backgroundColor = "#f59e0b";
+      } else {
+        opponentHealth.style.backgroundColor = "#22c55e";
+      }
+    }
+
+    // Reset matchmaking UI
+    function resetMatchmakingUI() {
+      matchmakingActive = false;
+      matchmakingStatus.style.display = "none";
+      findOpponentBtn.disabled = false;
+      findOpponentBtn.textContent = `🔍 Find Opponent (${pvpEnergyInput.value} Energy)`;
+    }
+
     // Initialize user and start energy regeneration
     socket.emit("initUser", { telegram_user_id });
 
@@ -202,6 +636,126 @@
       socket.emit("tap");
     });
 
+    // Battle type selection
+    pveBtn.addEventListener("click", () => {
+      if (matchmakingActive) return; // Don't allow switching during matchmaking
+      
+      battleType = "pve";
+      pveBtn.classList.add("active");
+      pvpBtn.classList.remove("active");
+      pveControls.style.display = "block";
+      pvpControls.style.display = "none";
+    });
+
+    pvpBtn.addEventListener("click", () => {
+      if (matchmakingActive) return; // Don't allow switching during matchmaking
+      
+      battleType = "pvp";
+      pvpBtn.classList.add("active");
+      pveBtn.classList.remove("active");
+      pvpControls.style.display = "block";
+      pveControls.style.display = "none";
+    });
+
+    // PvE difficulty selection
+    document.querySelectorAll(".difficulty-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    // PvP energy input handling
+    pvpEnergyInput.addEventListener("input", () => {
+      const energyValue = pvpEnergyInput.value;
+      pvpEnergyValue.textContent = energyValue;
+      findOpponentBtn.textContent = `🔍 Find Opponent (${energyValue} Energy)`;
+    });
+
+    // Battle button handling
+    battleBtn.addEventListener("click", () => {
+      if (!isConnected) {
+        statusMessage.textContent = "Not connected to server";
+        statusMessage.style.color = "red";
+        return;
+      }
+      
+      // Start a battle with 10 energy
+      const difficulty = document.querySelector(".difficulty-btn.active").dataset.difficulty;
+      socket.emit("battleStart", {
+        telegram_user_id,
+        battle_type: "pve",
+        difficulty,
+        energy_to_spend: 10
+      });
+      
+      // Disable button while waiting for response
+      battleBtn.disabled = true;
+      battleBtn.textContent = "Starting battle...";
+    });
+
+    // Find opponent button handling
+    findOpponentBtn.addEventListener("click", () => {
+      if (!isConnected) {
+        statusMessage.textContent = "Not connected to server";
+        statusMessage.style.color = "red";
+        return;
+      }
+      
+      const energyToSpend = parseInt(pvpEnergyInput.value);
+      socket.emit("battleStart", {
+        telegram_user_id,
+        battle_type: "pvp",
+        energy_to_spend: energyToSpend
+      });
+      
+      findOpponentBtn.disabled = true;
+      matchmakingStatus.style.display = "block";
+      matchmakingMessage.textContent = "Searching for opponent...";
+      matchmakingActive = true;
+    });
+
+    // Cancel matchmaking button handling
+    cancelMatchmakingBtn.addEventListener("click", () => {
+      socket.emit("cancelMatchmaking");
+      resetMatchmakingUI();
+    });
+
+    // Battle action buttons
+    document.querySelectorAll(".battle-action-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!activeBattleId) return;
+        
+        const action = btn.dataset.action;
+        
+        // Disable all action buttons
+        document.querySelectorAll(".battle-action-btn").forEach(b => b.disabled = true);
+        
+        // Send the action to the server
+        socket.emit("battleTurn", {
+          battle_id: activeBattleId,
+          action: {
+            type: action
+          }
+        });
+        
+        logBattleMessage(`You chose to ${action}.`);
+      });
+    });
+
+    // Quick battle button
+    battleQuickBtn.addEventListener("click", () => {
+      if (!activeBattleId) return;
+      
+      battleQuickBtn.disabled = true;
+      battleQuickBtn.textContent = "Resolving...";
+      
+      // Send auto-resolve request
+      socket.emit("battleAutoResolve", {
+        battle_id: activeBattleId
+      });
+    });
+
     // Socket event handlers
     socket.on("statusUpdated", ({ coins, energy, max_energy, pending = 0 }) => {
       coinCount.textContent = `Coins: ${coins}`;
@@ -212,10 +766,125 @@
       
       flashCoinCount();
       canTap = true;
+      
+      // Update battle button based on energy
+      battleBtn.disabled = energy < 10;
+      findOpponentBtn.disabled = energy < parseInt(pvpEnergyInput.value);
     });
 
     socket.on("energyUpdated", ({ energy, max_energy }) => {
       energyCount.textContent = `Energy: ${energy} / ${max_energy}`;
+      
+      // Update battle button based on energy
+      battleBtn.disabled = energy < 10;
+      findOpponentBtn.disabled = energy < parseInt(pvpEnergyInput.value);
+    });
+
+    // Matchmaking socket events
+    socket.on("matchmakingStarted", (data) => {
+      matchmakingMessage.textContent = `Looking for opponent (Energy: ${data.energy_to_spend})... Position: ${data.position}/${data.queue_size}`;
+      matchmakingStatus.style.display = "block";
+      findOpponentBtn.disabled = true;
+      matchmakingActive = true;
+    });
+
+    socket.on("matchmakingUpdate", (data) => {
+      matchmakingMessage.textContent = `${data.message} Position: ${data.position}/${data.queue_size}`;
+    });
+
+    socket.on("matchmakingCancelled", () => {
+      resetMatchmakingUI();
+    });
+
+    // Battle socket events
+    socket.on("battleStarted", (data) => {
+      console.log("Battle started:", data);
+      
+      // Reset matchmaking state if this was a PvP match
+      if (data.is_pvp) {
+        resetMatchmakingUI();
+      }
+      
+      // Store battle ID and stats
+      activeBattleId = data.battle_id;
+      userStats = data.user_stats;
+      opponentStats = data.opponent_stats;
+      
+      // Update energy display
+      energyCount.textContent = `Energy: ${data.energy} / ${data.max_energy}`;
+      
+      // Display battle arena
+      battleArena.style.display = "block";
+      battleActions.style.display = "flex";
+      battleQuickBtn.style.display = data.is_pvp ? "none" : "block"; // Hide auto-resolve for PvP
+      battleResult.style.display = "none";
+      
+      // Reset battle log
+      battleLog.innerHTML = "";
+      
+      // Set opponent name based on battle type
+      if (data.is_pvp) {
+        opponentName.textContent = data.opponent_name || "Opponent";
+        logBattleMessage(`PvP battle started against ${data.opponent_name || "Opponent"}!`);
+      } else {
+        opponentName.textContent = data.opponent?.name || "Enemy";
+        logBattleMessage(`Battle started against ${data.opponent?.name || "Enemy"}!`);
+      }
+      
+      // Enable action buttons
+      document.querySelectorAll(".battle-action-btn").forEach(b => b.disabled = false);
+      
+      // Update health bars
+      updateHealthBars();
+      
+      // Re-enable battle buttons
+      battleBtn.disabled = false;
+      battleBtn.textContent = "⚔️ Enter Battle (10 Energy)";
+      findOpponentBtn.disabled = false;
+      findOpponentBtn.textContent = `🔍 Find Opponent (${pvpEnergyInput.value} Energy)`;
+    });
+
+    socket.on("battleTurnProcessed", (data) => {
+      console.log("Battle turn processed:", data);
+      
+      // Update stats
+      userStats = data.user_stats;
+      opponentStats = data.opponent_stats;
+      
+      // Log the round result
+      logBattleMessage(data.current_round.result);
+      
+      // Update health bars
+      updateHealthBars();
+      
+      // Re-enable action buttons for next turn
+      document.querySelectorAll(".battle-action-btn").forEach(b => b.disabled = false);
+    });
+
+    socket.on("battleCompleted", (data) => {
+      console.log("Battle completed:", data);
+      
+      // Update coin count
+      coinCount.textContent = `Coins: ${data.coins}`;
+      flashCoinCount();
+      
+      // Show battle result
+      battleResult.style.display = "block";
+      battleActions.style.display = "none";
+      battleQuickBtn.style.display = "none";
+      
+      // Update result text and class
+      resultText.textContent = `Battle ${data.result}!`;
+      battleResult.className = "battle-result " + data.result.toLowerCase();
+      
+      // Show rewards
+      battleRewards.textContent = `You earned ${data.coins_earned} coins and ${data.experience_earned} experience!`;
+      
+      // Log the final outcome
+      logBattleMessage(`Battle ended with ${data.result}. You earned ${data.coins_earned} coins!`);
+      
+      // Reset battle state
+      activeBattleId = null;
     });
 
     socket.on("error", ({ message }) => {
@@ -227,6 +896,22 @@
       }, 3000);
       
       canTap = true;
+      
+      // Re-enable battle button if it was disabled
+      if (battleBtn.textContent === "Starting battle...") {
+        battleBtn.disabled = false;
+        battleBtn.textContent = "⚔️ Enter Battle (10 Energy)";
+      }
+      
+      // Reset matchmaking
+      if (matchmakingActive) {
+        resetMatchmakingUI();
+      }
+      
+      // Re-enable action buttons if in a battle
+      if (activeBattleId) {
+        document.querySelectorAll(".battle-action-btn").forEach(b => b.disabled = false);
+      }
     });
 
     // Connection state handling
@@ -271,6 +956,9 @@
       
       statusMessage.textContent = "Disconnected from server. Reconnecting...";
       statusMessage.style.color = "red";
+      
+      // Reset matchmaking on disconnect
+      resetMatchmakingUI();
     });
 
     // Double tap detection for mobile
