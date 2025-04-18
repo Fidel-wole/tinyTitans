@@ -34,9 +34,9 @@ export default class UserService {
     }
   }
 
-  static async getUser(telegram_userId: string) {
+  static async getUser(telegram_user_id: string) {
     try {
-      const user = await User.findOne({ telegram_userId });
+      const user = await User.findOne({ telegram_user_id });
       return user;
     } catch (err: any) {
       throw new Error(err);
@@ -45,7 +45,7 @@ export default class UserService {
 
   static async getReferrals(telegram_userId: string) {
     try {
-      const user = await User.findOne({ telegram_userId }).populate(
+      const user = await User.findOne({ telegram_user_id }).populate(
         "referred_by"
       );
       if (!user) {
@@ -72,9 +72,9 @@ export default class UserService {
     }
   }
 
-  static async selectCharacter(telegram_userId: string, characterId: string) {
+  static async selectCharacter(telegram_user_id: string, characterId: string) {
     try {
-      const user = await User.findOne({ telegram_userId });
+      const user = await User.findOne({ telegram_user_id });
 
       if (!user) {
         throw new Error("User not found");
