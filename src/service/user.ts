@@ -43,7 +43,7 @@ export default class UserService {
     }
   }
 
-  static async getReferrals(telegram_userId: string) {
+  static async getReferrals(telegram_user_id: string) {
     try {
       const user = await User.findOne({ telegram_user_id }).populate(
         "referred_by"
