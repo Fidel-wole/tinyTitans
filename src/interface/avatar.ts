@@ -76,4 +76,5 @@ export interface ICharacter {
     teamId?: string;
     lastDailyReward: Date;
     is_free: boolean;
+    price?: number;
 }

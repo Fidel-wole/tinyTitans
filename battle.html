@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tiny Titans Socket Test</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Tiny Titans Battle Test</h1>
+  
+  <div>
+    <h2>Player 1</h2>
+    <input type="text" id="player1Id" placeholder="Telegram User ID">
+    <button id="connectPlayer1">Connect Player 1</button>
+    <button id="startMatchmaking1">Start Matchmaking</button>
+    <button id="attack1">Attack</button>
+    <pre id="player1Log"></pre>
+  </div>
+  
+  <div>
+    <h2>Player 2</h2>
+    <input type="text" id="player2Id" placeholder="Telegram User ID">
+    <button id="connectPlayer2">Connect Player 2</button>
+    <button id="startMatchmaking2">Start Matchmaking</button>
+    <button id="attack2">Attack</button>
+    <pre id="player2Log"></pre>
+  </div>
+  
+  <script>
+    // Socket connections
+    let socket1, socket2;
+    let battleId1, battleId2;
+    
+    // Player 1 connection
+    document.getElementById('connectPlayer1').addEventListener('click', () => {
+      const telegramUserId = document.getElementById('player1Id').value;
+      if (!telegramUserId) {
+        alert('Please enter a Telegram User ID');
+        return;
+      }
+      
+      socket1 = io('http://localhost:3001');
+      
+      socket1.on('connect', () => {
+        log('player1Log', 'Connected as Player 1');
+        socket1.emit('initUser', { telegram_user_id: telegramUserId });
+      });
+      
+      // Handle various socket events
+      socket1.on('statusUpdated', (data) => {
+        log('player1Log', 'Status Updated: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('matchmakingStarted', (data) => {
+        log('player1Log', 'Matchmaking Started: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('matchmakingUpdate', (data) => {
+        log('player1Log', 'Matchmaking Update: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('battleStarted', (data) => {
+        log('player1Log', 'Battle Started: ' + JSON.stringify(data));
+        battleId1 = data.battle_id;
+      });
+      
+      socket1.on('waitingForOpponent', (data) => {
+        log('player1Log', 'Waiting for opponent action: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('battleTurnProcessed', (data) => {
+        log('player1Log', 'Battle Turn Processed: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('battleCompleted', (data) => {
+        log('player1Log', 'Battle Completed: ' + JSON.stringify(data));
+      });
+      
+      socket1.on('error', (error) => {
+        log('player1Log', 'Error: ' + error.message);
+      });
+    });
+    
+    // Player 2 connection
+    document.getElementById('connectPlayer2').addEventListener('click', () => {
+      const telegramUserId = document.getElementById('player2Id').value;
+      if (!telegramUserId) {
+        alert('Please enter a Telegram User ID');
+        return;
+      }
+      
+      socket2 = io('http://localhost:3001');
+      
+      socket2.on('connect', () => {
+        log('player2Log', 'Connected as Player 2');
+        socket2.emit('initUser', { telegram_user_id: telegramUserId });
+      });
+      
+      // Handle various socket events
+      socket2.on('statusUpdated', (data) => {
+        log('player2Log', 'Status Updated: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('matchmakingStarted', (data) => {
+        log('player2Log', 'Matchmaking Started: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('matchmakingUpdate', (data) => {
+        log('player2Log', 'Matchmaking Update: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('battleStarted', (data) => {
+        log('player2Log', 'Battle Started: ' + JSON.stringify(data));
+        battleId2 = data.battle_id;
+      });
+      
+      socket2.on('waitingForOpponent', (data) => {
+        log('player2Log', 'Waiting for opponent action: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('battleTurnProcessed', (data) => {
+        log('player2Log', 'Battle Turn Processed: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('battleCompleted', (data) => {
+        log('player2Log', 'Battle Completed: ' + JSON.stringify(data));
+      });
+      
+      socket2.on('error', (error) => {
+        log('player2Log', 'Error: ' + error.message);
+      });
+    });
+    
+    // Start matchmaking for Player 1
+    document.getElementById('startMatchmaking1').addEventListener('click', () => {
+      if (!socket1) {
+        alert('Connect Player 1 first');
+        return;
+      }
+      
+      socket1.emit('battleStart', {
+        telegram_user_id: document.getElementById('player1Id').value,
+        battle_type: 'pvp',
+        energy_to_spend: 10
+      });
+    });
+    
+    // Start matchmaking for Player 2
+    document.getElementById('startMatchmaking2').addEventListener('click', () => {
+      if (!socket2) {
+        alert('Connect Player 2 first');
+        return;
+      }
+      
+      socket2.emit('battleStart', {
+        telegram_user_id: document.getElementById('player2Id').value,
+        battle_type: 'pvp',
+        energy_to_spend: 10
+      });
+    });
+    
+    // Send attack action for Player 1
+    document.getElementById('attack1').addEventListener('click', () => {
+      if (!socket1 || !battleId1) {
+        alert('Player 1 must be in a battle');
+        return;
+      }
+      
+      socket1.emit('battleTurn', {
+        battle_id: battleId1,
+        action: {
+          type: 'attack'
+        }
+      });
+    });
+    
+    // Send attack action for Player 2
+    document.getElementById('attack2').addEventListener('click', () => {
+      if (!socket2 || !battleId2) {
+        alert('Player 2 must be in a battle');
+        return;
+      }
+      
+      socket2.emit('battleTurn', {
+        battle_id: battleId2,
+        action: {
+          type: 'attack'
+        }
+      });
+    });
+    
+    // Helper function to log data
+    function log(elementId, message) {
+      const element = document.getElementById(elementId);
+      const date = new Date().toLocaleTimeString();
+      element.innerHTML += `[${date}] ${message}\n`;
+      element.scrollTop = element.scrollHeight;
+    }
+  </script>
+</body>
+</html>

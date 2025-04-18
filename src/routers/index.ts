@@ -5,6 +5,7 @@ import { uploadImage } from "../controller/cloudinary";
 import characterRouter from "./character";
 import quizRouter from "./quiz";
 import taskRouter from "./task";
+import battleRouter from "./battle";
 
 const testRouter = Router();
 
@@ -24,5 +25,6 @@ const v1Router: Router[] = [
   characterRouter,
   quizRouter,
   taskRouter,
+  battleRouter,
 ];
 export default v1Router;
