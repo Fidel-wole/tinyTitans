@@ -41,23 +41,47 @@ export default class TaskService {
         throw new Error("User not found.");
       }
 
+      // Get the task details to check its type
+      const taskDetails = await Task.findById(data.task_id);
+      if (!taskDetails) {
+        throw new Error("Task not found.");
+      }
+
+      // If task is a quiz, automatically set status to completed
+      if (taskDetails.type === TaskType.QUIZ && data.metadata?.quiz) {
+        data.status = TaskStatus.COMPLETED;
+      }
+
+      const isCompleted = data.status === TaskStatus.COMPLETED;
+      
       let taskIndex = user.tasks_progress.findIndex(
         (t) => t.task_id.toString() === data.task_id.toString()
       );
 
       if (taskIndex === -1) {
-        // If the task is not ongoing, create a new entry for the task
+        // If the task doesn't exist yet, create a new entry
         user.tasks_progress.push({
           task_id: data.task_id,
-          status: TaskStatus.ONGOING,
+          status: data.status || TaskStatus.ONGOING,
           started_at: new Date(),
           last_updated_at: new Date(),
           progress: data.progress || 0,
           metadata: data.metadata || {},
         });
+        
+        // If this is a new task being marked as completed, reward the user
+        if (isCompleted) {
+          user.coins += taskDetails.reward_points;
+        }
       } else {
-        // If the task exists, update the progress and metadata
+        // Update existing task
         const task = user.tasks_progress[taskIndex];
+        const previousStatus = task.status;
+        
+        // Update status if provided or if it's a quiz task
+        if (data.status) {
+          task.status = data.status;
+        }
         
         // Update progress if provided
         if (data.progress !== undefined) {
@@ -83,6 +107,11 @@ export default class TaskService {
         }
         
         task.last_updated_at = new Date();
+        
+        // If task is being marked as completed for the first time, reward the user
+        if (isCompleted && previousStatus !== TaskStatus.COMPLETED) {
+          user.coins += taskDetails.reward_points;
+        }
       }
 
       await user.save();
@@ -91,7 +120,6 @@ export default class TaskService {
       throw new Error(`Error tracking task progress: ${err.message}`);
     }
   }
-
 
   static async getTotalCompletedTasks(userId: string) {
     try {
