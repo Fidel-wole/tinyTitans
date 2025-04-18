@@ -75,4 +75,5 @@ export interface ICharacter {
     referredBy?: string;
     teamId?: string;
     lastDailyReward: Date;
+    is_free: boolean;
 }

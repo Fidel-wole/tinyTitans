@@ -98,13 +98,12 @@ export default class UserService {
     updateData: Partial<IUser>
   ): Promise<IUser> {
     try {
-      // Validate the user exists
       const user = await User.findOne({ telegram_user_id: user_id });
       if (!user) {
         throw new Error("User not found");
       }
-
-      // Prevent updating certain sensitive fields
+  
+      // Prevent updating sensitive fields
       const protectedFields = [
         "user_id",
         "referral_code",
@@ -112,53 +111,60 @@ export default class UserService {
         "created_at",
         "updated_at",
       ];
-
+  
       protectedFields.forEach((field) => {
         delete updateData[field as keyof typeof updateData];
       });
-
-      // Handle special updates
+  
+      // Handle energy logic
       if (updateData.energy !== undefined) {
         updateData.energy = Math.min(updateData.energy, user.max_energy);
         updateData.last_energy_update = new Date();
       }
-
+  
       if (updateData.tap_power !== undefined) {
         updateData.tap_power *= user.tap_multiplier;
       }
-
-      // Update experience and level if provided
-      if (updateData.avatar_stats?.experience !== undefined) {
-        const newExp =
-          user.avatar_stats.experience +
-          (updateData.avatar_stats.experience || 0);
-        if (newExp >= user.avatar_stats.experience_needed) {
-          user.level += 1;
-          user.skill_points += 1;
-          user.avatar_stats.experience =
-            newExp - user.avatar_stats.experience_needed;
-          user.avatar_stats.experience_needed *= 1.5;
-        } else {
-          user.avatar_stats.experience = newExp;
+  
+      // ⚡ Update stats of the currently selected avatar
+      if (
+        updateData.avatars &&
+        updateData.avatars.length > 0 &&
+        user.avatar // currently selected avatar ID
+      ) {
+        const currentAvatar = user.avatars.find(
+          (a) => a.character.toString() === user.avatar?.toString()
+        );
+  
+        const incomingAvatarUpdate = updateData.avatars.find(
+          (a) => a.character.toString() === user.avatar?.toString()
+        );
+  
+        if (currentAvatar && incomingAvatarUpdate?.stats?.experience !== undefined) {
+          const incomingExp = incomingAvatarUpdate.stats.experience || 0;
+          const totalExp = currentAvatar.stats.experience + incomingExp;
+  
+          if (totalExp >= currentAvatar.stats.experience_needed) {
+            user.level += 1;
+            user.skill_points += 1;
+            currentAvatar.stats.experience =
+              totalExp - currentAvatar.stats.experience_needed;
+            currentAvatar.stats.experience_needed *= 1.5;
+          } else {
+            currentAvatar.stats.experience = totalExp;
+          }
         }
       }
-
-      // Update the user with the new data
-      const updatedUser = await User.findOneAndUpdate(
-        { telegram_user_id: user_id },
-        { $set: updateData },
-        { new: true, runValidators: true }
-      );
-
-      console.log("Updated User:", updatedUser); 
-
-      if (!updatedUser) {
-        throw new Error("Failed to update user");
-      }
-
-      return updatedUser;
+  
+      // Set all other updateable fields
+      Object.assign(user, updateData);
+  
+      await user.save();
+  
+      return user;
     } catch (error: any) {
       throw new Error(`Error updating user: ${error.message}`);
     }
   }
+  
 }

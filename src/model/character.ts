@@ -32,7 +32,8 @@ const CharacterSchema = new Schema<ICharacter>({
     hairColor: { type: String },
     eyeColor: { type: String },
     accessories: [{ type: String }]
-  }
+  },
+  is_free: { type: Boolean, default: true },
 }, {
   timestamps: true
 });

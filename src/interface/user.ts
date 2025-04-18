@@ -20,15 +20,18 @@ export interface IUser {
   level: number;
 
   // Character System
-  avatar?: string; // Reference to Character model
-  avatar_stats: {
-    power: number;
-    defense: number;
-    speed: number;
-    health: number;
-    experience: number;
-    experience_needed: number;
-  };
+  avatar?: string;
+  avatars: {
+    character: string;
+    stats: {
+      power: number;
+      defense: number;
+      speed: number;
+      health: number;
+      experience: number;
+      experience_needed: number;
+    };
+  }[];
 
   // Progression System
   skill_points: number;
