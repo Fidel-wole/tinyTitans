@@ -12,6 +12,8 @@ export enum TaskType {
     REFER = "refer",
     JOIN_DISCORD = "join-discord",
     CUSTOM = "custom",
+    COMMUNITY = "community",
+    WATCH_AND_EARN = "watch_and_earn"
   }
 
   export interface IUserTaskProgress {
