@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import User from "../model/user";
 
 interface TapPayload {
-  telegram_userId: string;
+  telegram_user_id: string;
 }
 
 export const registerSocketHandlers = (io: Server): void => {
