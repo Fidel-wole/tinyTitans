@@ -348,7 +348,10 @@ export const registerSocketHandlers = (io: Server): void => {
                 );
               } catch (err) {
                 retryCount++;
-                console.error(`[Socket] Sync attempt ${retryCount} failed:`, err);
+                console.error(
+                  `[Socket] Sync attempt ${retryCount} failed:`,
+                  err
+                );
                 // Wait a bit before retrying
                 await new Promise((resolve) =>
                   setTimeout(resolve, 100 * retryCount)
@@ -948,7 +951,8 @@ export const registerSocketHandlers = (io: Server): void => {
         // This ensures we have the most up-to-date coin count to work with
         const currentUser = await User.findOne({
           telegram_user_id: userCache.telegramUserId,
-        });
+        }).lean(); // Use lean() to get a plain JS object without Mongoose document methods
+
         if (!currentUser) throw new Error("User not found in database");
 
         // Calculate the exact amount to update
@@ -965,10 +969,7 @@ export const registerSocketHandlers = (io: Server): void => {
           `[Socket] DB Sync: About to update User ${userCache.telegramUserId} coins from ${currentUser.coins} by adding ${pendingCoins}`
         );
 
-        // Use a direct update with $inc for atomic operation
-        // This is the most reliable way to ensure all taps are counted
-        const updateOptions = { new: true, runValidators: true };
-
+        // Use a direct update operation without session
         const updateResult = await User.findOneAndUpdate(
           { telegram_user_id: userCache.telegramUserId },
           {
@@ -978,7 +979,7 @@ export const registerSocketHandlers = (io: Server): void => {
               last_energy_update: userCache.last_energy_update,
             },
           },
-          updateOptions
+          { new: true, runValidators: true }
         );
 
         if (!updateResult) {
