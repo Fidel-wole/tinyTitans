@@ -1,6 +1,8 @@
 import User from "../model/user";
 import { IUser } from "../interface/user";
 import { generateReferralCode } from "../utils/strings";
+import { Battle } from "../model/battle";
+import mongoose from "mongoose";
 
 export default class UserService {
   static async createUser(user: IUser) {
@@ -167,6 +169,59 @@ export default class UserService {
       return user;
     } catch (error: any) {
       throw new Error(`Error updating user: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get user profile statistics including battles fought, wins, coins earned, tasks completed and referrals
+   * @param telegram_user_id The user's telegram ID
+   * @returns User profile statistics or null if user not found
+   */
+  static async getUserProfile(telegram_user_id: string) {
+    try {
+      // Get basic user info
+      const user = await User.findOne({ telegram_user_id });
+      if (!user) {
+        return null;
+      }
+
+      // Get battle statistics
+      const battles = await Battle.find({ user_id: user._id });
+      const totalBattles = battles.length;
+      const battlesWon = battles.filter(battle => battle.result === 'victory').length;
+      
+      // Calculate coins earned from battles
+      const battleCoinsEarned = battles.reduce((sum, battle) => sum + (battle.coins_earned || 0), 0);
+      
+      // Count completed tasks
+      const completedTasks = user.tasks_progress.filter(task => task.status === 'completed').length;
+      
+      // Get total referrals (users who have this user as their referrer)
+      const referrals = await User.countDocuments({ referred_by: user._id });
+
+      return {
+        userId: user._id,
+        username: user.username,
+        level: user.level,
+        totalBattles,
+        battlesWon,
+        winRate: totalBattles > 0 ? Math.round((battlesWon / totalBattles) * 100) : 0,
+        totalCoinsEarned: battleCoinsEarned,
+        currentCoins: user.coins,
+        tasksCompleted: completedTasks,
+        totalReferrals: referrals,
+        energy: user.energy,
+        maxEnergy: user.max_energy,
+        // Include avatar info if exists
+        avatarStats: user.avatar ? {
+          avatarId: user.avatar,
+          // Find the selected avatar's stats
+          ...user.avatars.find(a => a.character.toString() === user.avatar?.toString())?.stats
+        } : null
+      };
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      throw new Error(`Failed to fetch user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

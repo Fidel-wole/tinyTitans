@@ -9,7 +9,7 @@ export default class UserController {
       const data: IUser = req.body;
       const user = await UserService.createUser(req.body);
       Dispatcher.DispatchSuccessMessage(res, "User created successfully", user);
-    } catch (err:any) {
+    } catch (err: any) {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
@@ -19,7 +19,7 @@ export default class UserController {
       const { telegram_userId } = req.params;
       const user = await UserService.getUser(telegram_userId);
       Dispatcher.DispatchSuccessMessage(res, "User fetched successfully", user);
-    } catch (err:any) {
+    } catch (err: any) {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
@@ -33,7 +33,7 @@ export default class UserController {
         "Referrals fetched successfully",
         referrals
       );
-    } catch (err:any) {
+    } catch (err: any) {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
@@ -45,7 +45,7 @@ export default class UserController {
         "Leaderboard fetched successfully",
         leaderboard
       );
-    } catch (err:any) {
+    } catch (err: any) {
       Dispatcher.DispatchErrorMessage(res, err.message);
     }
   }
@@ -54,8 +54,10 @@ export default class UserController {
       const { telegram_userId } = req.params;
       const { characterId } = req.body;
 
-  
-      const user = await UserService.selectCharacter(telegram_userId, characterId);
+      const user = await UserService.selectCharacter(
+        telegram_userId,
+        characterId
+      );
 
       Dispatcher.DispatchSuccessMessage(
         res,
@@ -73,8 +75,33 @@ export default class UserController {
       const data: Partial<IUser> = req.body;
       const user = await UserService.updateUser(telegram_user_id, data);
       Dispatcher.DispatchSuccessMessage(res, "User updated successfully", user);
-    } catch (err:any) {
+    } catch (err: any) {
       Dispatcher.DispatchErrorMessage(res, err.message);
+    }
+  }
+
+  /**
+   * Get user profile statistics including battles, wins, coins earned, tasks and referrals
+   * @param req Express request object
+   * @param res Express response object
+   */
+  static async getUserProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const { telegram_userId } = req.params;
+      const profile = await UserService.getUserProfile(telegram_userId);
+
+      if (!profile) {
+        Dispatcher.DispatchErrorMessage(res, "User not found");
+        return;
+      }
+
+      Dispatcher.DispatchSuccessMessage(
+        res,
+        "User profile fetched successfully",
+        profile
+      );
+    } catch (error: any) {
+      Dispatcher.DispatchErrorMessage(res, error.message);
     }
   }
 }

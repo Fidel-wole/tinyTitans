@@ -15,4 +15,6 @@ userRouter.post(
 );
 userRouter.put("/user/update/:telegram_user_id", UserController.updateUser);
 userRouter.get("/leaderboard", UserController.getLeaderboard);
+userRouter.get("/user/:telegram_userId/profile", UserController.getUserProfile);
+
 export default userRouter;
