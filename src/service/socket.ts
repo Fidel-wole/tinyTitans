@@ -26,6 +26,9 @@ interface UserCache {
   lastSynced: number; // timestamp of last successful DB sync
   pendingTaps: number; // taps collected during DB outage
   pendingSave: boolean; // whether we need to save to DB
+  syncInProgress?: boolean; // track if sync is currently in progress
+  tapQueue?: number; // track taps that need to be synced
+  lastTapTime?: number; // timestamp of last tap for rate limiting
   activeBattleId?: string; // Track active battle for the user
   avatarStats?: {
     power: number;
@@ -239,8 +242,8 @@ export const registerSocketHandlers = (io: Server): void => {
       }
     });
 
-    // 💥 Handle tapping logic - works even during DB outages
-    socket.on("tap", () => {
+    // 💥 Handle tapping logic with guaranteed database synchronization
+    socket.on("tap", async () => {
       if (!telegramUserId) {
         return socket.emit("error", {
           message: "Not initialized. Please refresh.",
@@ -250,53 +253,98 @@ export const registerSocketHandlers = (io: Server): void => {
       const userCache = userCaches.get(socket.id);
       if (!userCache) {
         return socket.emit("error", {
-          message: "Session expired. Please refresh.",
+          message: "User data not found. Please refresh.",
         });
       }
 
-      // Prevent tapping during active processing
-      if (isTapping) return;
-
       try {
-        isTapping = true;
-
-        // Always update energy before processing tap
-        regenerateEnergyInCache(userCache);
-
         // Check if we have energy to tap
         if (userCache.energy <= 0) {
           socket.emit("error", {
             message: "No energy left. Please wait to recharge.",
           });
-          isTapping = false;
           return;
         }
 
-        // Process the tap in cache immediately
+        // Initialize tracking properties if not already set
+        if (userCache.tapQueue === undefined) userCache.tapQueue = 0;
+        if (userCache.lastTapTime === undefined) userCache.lastTapTime = 0;
+        
+        const now = Date.now();
+        
+        // Immediate UI update for responsiveness
+        socket.emit("tapRegistered", {
+          coins: userCache.coins + 1,
+          energy: userCache.energy - 1,
+          max_energy: userCache.max_energy,
+          pending: dbOffline ? userCache.pendingTaps + 1 : 0,
+          timestamp: now
+        });
+        
+        // Update energy in cache first
+        regenerateEnergyInCache(userCache);
+        
+        // Double-check energy after regeneration
+        if (userCache.energy <= 0) {
+          socket.emit("statusUpdated", {
+            coins: userCache.coins,
+            energy: 0,
+            max_energy: userCache.max_energy,
+            pending: dbOffline ? userCache.pendingTaps : 0,
+          });
+          return;
+        }
+        
+        // Process the tap in cache
         userCache.coins += 1;
         userCache.energy -= 1;
         userCache.pendingTaps += 1;
         userCache.pendingSave = true;
-
-        // Send immediate feedback to client
+        userCache.lastTapTime = now;
+        userCache.tapQueue = (userCache.tapQueue || 0) + 1;
+        
+        // Send updated status to client
         socket.emit("statusUpdated", {
           coins: userCache.coins,
           energy: userCache.energy,
           max_energy: userCache.max_energy,
           pending: dbOffline ? userCache.pendingTaps : 0,
         });
-
-        // Try to sync to DB if we've accumulated taps and DB is back online
-        if (userCache.pendingTaps >= 5 && !dbOffline) {
-          syncCacheToDatabase(socket.id).catch((err) => {
-            console.error(`[Socket] Error syncing after tap:`, err);
-          });
+        
+        // If DB is online, try to sync - but avoid multiple concurrent syncs
+        if (!dbOffline && !userCache.syncInProgress) {
+          try {
+            userCache.syncInProgress = true;
+            
+            // Database synchronization with retry logic
+            let syncSuccess = false;
+            let retryCount = 0;
+            const MAX_RETRIES = 3;
+            
+            while (!syncSuccess && retryCount < MAX_RETRIES) {
+              try {
+                await syncCacheToDatabase(socket.id);
+                syncSuccess = true;
+                console.log(`[Socket] Synced for user ${telegramUserId}, coins: ${userCache.coins}, taps: ${userCache.pendingTaps}`);
+              } catch (err) {
+                retryCount++;
+                console.error(`[Socket] Sync attempt ${retryCount} failed:`, err);
+                // Wait a bit before retrying
+                await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
+              }
+            }
+            
+            if (!syncSuccess) {
+              console.error(`[Socket] All sync attempts failed, marking DB as offline`);
+              dbOffline = true;
+            }
+          } finally {
+            userCache.syncInProgress = false;
+          }
         }
       } catch (err) {
         console.error(`[Socket] Error processing tap:`, err);
         socket.emit("error", { message: "Error processing tap" });
-      } finally {
-        isTapping = false;
       }
     });
 
@@ -323,8 +371,9 @@ export const registerSocketHandlers = (io: Server): void => {
       try {
         const userCache = userCaches.get(socket.id);
         if (!userCache) {
+          // If no cache exists, return error without session expiration message
           return socket.emit("error", {
-            message: "Session expired. Please refresh.",
+            message: "User data not found. Please refresh.",
           });
         }
 
@@ -860,7 +909,7 @@ export const registerSocketHandlers = (io: Server): void => {
       userCaches.delete(socket.id);
     });
 
-    // Sync cache to database when available
+    // Sync cache to database - improved for reliability with direct update
     async function syncCacheToDatabase(socketId: string): Promise<boolean> {
       const userCache = userCaches.get(socketId);
       if (!userCache || !userCache.pendingSave) return false;
@@ -870,30 +919,62 @@ export const registerSocketHandlers = (io: Server): void => {
         throw new Error("Database connection unavailable");
       }
 
-      // Fetch latest user data and apply cached changes
-      const user = await User.findOne({
-        telegram_user_id: userCache.telegramUserId,
-      });
-      if (!user) throw new Error("User not found in database");
-
-      // Apply pending taps
-      if (userCache.pendingTaps > 0) {
-        user.coins += userCache.pendingTaps;
+      try {
+        // IMPORTANT: Get the current user's exact state from database first
+        // This ensures we have the most up-to-date coin count to work with
+        const currentUser = await User.findOne({ telegram_user_id: userCache.telegramUserId });
+        if (!currentUser) throw new Error("User not found in database");
+        
+        // Calculate the exact amount to update
+        const pendingCoins = userCache.pendingTaps;
+        
+        // Double-check that we're updating the right amount
+        if (pendingCoins <= 0) {
+          userCache.pendingTaps = 0;
+          userCache.pendingSave = false;
+          return true; // Nothing to update
+        }
+        
+        console.log(`[Socket] DB Sync: About to update User ${userCache.telegramUserId} coins from ${currentUser.coins} by adding ${pendingCoins}`);
+        
+        // Use a direct update with $inc for atomic operation
+        // This is the most reliable way to ensure all taps are counted
+        const updateOptions = { new: true, runValidators: true };
+        
+        const updateResult = await User.findOneAndUpdate(
+          { telegram_user_id: userCache.telegramUserId },
+          { 
+            $inc: { coins: pendingCoins },
+            $set: {
+              energy: userCache.energy,
+              last_energy_update: userCache.last_energy_update
+            }
+          },
+          updateOptions
+        );
+        
+        if (!updateResult) {
+          throw new Error("Failed to update user in database");
+        }
+        
+        // Ensure the cache reflects what's actually in the database
+        userCache.coins = updateResult.coins;
+        
+        // Log detailed sync info for verification
+        console.log(`[Socket] DB Sync SUCCESS: User ${userCache.telegramUserId} coins updated to ${updateResult.coins}`);
+        console.log(`[Socket] Tap Details: Processed ${pendingCoins} taps`);
+        
+        // Clear pending taps ONLY after successful DB update
         userCache.pendingTaps = 0;
+        userCache.lastSynced = Date.now();
+        userCache.pendingSave = false;
+        
+        return true;
+      } catch (err) {
+        console.error(`[Socket] DB Sync Error:`, err);
+        // Don't reset pendingTaps so we can retry with the same count
+        throw err;
       }
-
-      // Update energy and last_energy_update
-      user.energy = userCache.energy;
-      user.last_energy_update = userCache.last_energy_update;
-
-      // Save to database
-      await user.save();
-
-      // Update cache with latest synced time
-      userCache.lastSynced = Date.now();
-      userCache.pendingSave = false;
-
-      return true;
     }
   });
 };
